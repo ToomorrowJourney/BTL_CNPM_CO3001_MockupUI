@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { MOCK_TUTORS } from '../services/mockData';
+import { getTutorAvailability, saveTutorAvailability } from '../services/mockData';
 import { ChevronLeft, ChevronRight, Clock, Check, Save } from 'lucide-react';
 import './SetAvailabilityPage.css';
 
@@ -16,16 +16,11 @@ const SetAvailabilityPage = () => {
     const fetchAvailability = async () => {
         if (!user) return;
         
-        // Find tutor profile matching the user
-        const tutorProfile = MOCK_TUTORS.find(t => t.userId === user.id);
+        // Get availability from localStorage or default data
+        const tutorAvailability = getTutorAvailability(user.id);
         
-        if (tutorProfile) {
-            // Deep copy to allow mutation in local state
-            setAvailability(JSON.parse(JSON.stringify(tutorProfile.availability)));
-        } else {
-            // Initialize empty if not found
-             setAvailability({});
-        }
+        // Deep copy to allow mutation in local state
+        setAvailability(JSON.parse(JSON.stringify(tutorAvailability)));
         setLoading(false);
     };
 
@@ -96,11 +91,20 @@ const SetAvailabilityPage = () => {
       });
   };
 
-  const handleSave = () => {
-      // In a real app, this would make an API call
-      // For now, we just show a success message as we updated local state
-      setMessage({ type: 'success', text: 'Lưu lịch trống thành công!' });
-      setTimeout(() => setMessage(null), 3000);
+  const handleSave = async () => {
+      if (!user) return;
+      
+      try {
+          // Save availability to localStorage
+          await saveTutorAvailability(user.id, availability);
+          
+          setMessage({ type: 'success', text: 'Lưu lịch trống thành công!' });
+          setTimeout(() => setMessage(null), 3000);
+      } catch (error) {
+          console.error('Error saving availability:', error);
+          setMessage({ type: 'error', text: 'Có lỗi xảy ra khi lưu lịch trống!' });
+          setTimeout(() => setMessage(null), 3000);
+      }
   };
   
   const changeWeek = (offset) => {

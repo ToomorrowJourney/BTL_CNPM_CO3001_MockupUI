@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { MOCK_SESSIONS, MOCK_USERS, cancelSession, getFeedbackBySessionId } from '../services/mockData';
+import { getAllSessions, MOCK_USERS, MOCK_TUTORS, cancelSession, getFeedbackBySessionId } from '../services/mockData';
 import { Calendar, Clock, XCircle, User, MessageSquare, Loader2 } from 'lucide-react';
 import './MySessions.css';
 
@@ -13,8 +13,13 @@ const MySessions = () => {
   const [selectedSession, setSelectedSession] = useState(null);
   const [cancelReason, setCancelReason] = useState('');
   const [error, setError] = useState('');
-  const [sessions, setSessions] = useState(MOCK_SESSIONS);
+  const [sessions, setSessions] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Load sessions from localStorage on mount
+  useEffect(() => {
+    setSessions(getAllSessions());
+  }, []);
 
   // Filter sessions dựa trên tab và role
   const filteredSessions = useMemo(() => {
@@ -31,26 +36,41 @@ const MySessions = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    let filtered;
     if (activeTab === 'upcoming') {
-      return userSessions.filter(
+      filtered = userSessions.filter(
         (session) =>
           session.status === 'Scheduled' &&
           new Date(session.date) >= today
       );
+      // Sort upcoming: gần nhất trước (ascending)
+      return filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
     } else {
-      return userSessions.filter(
+      filtered = userSessions.filter(
         (session) =>
           session.status === 'Completed' ||
           session.status === 'Cancelled' ||
           (session.status === 'Scheduled' && new Date(session.date) < today)
       );
+      // Sort history: mới nhất trước (descending - từ hiện tại về quá khứ)
+      return filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
     }
   }, [sessions, activeTab, user]);
 
   // Get user name từ session data
   const getUserName = (session, role) => {
     if (role === 'Student') {
-      const tutor = MOCK_USERS.find(u => u.id === session.tutorId);
+      // Try to find by userId first
+      let tutor = MOCK_USERS.find(u => u.id === session.tutorId);
+      
+      // If not found, tutorId might be a tutor profile id, try to find the user
+      if (!tutor) {
+        const tutorProfile = MOCK_TUTORS.find(t => t.id === session.tutorId);
+        if (tutorProfile) {
+          tutor = MOCK_USERS.find(u => u.id === tutorProfile.userId);
+        }
+      }
+      
       return tutor?.name || 'Unknown Tutor';
     } else {
       const student = MOCK_USERS.find(u => u.id === session.studentId);

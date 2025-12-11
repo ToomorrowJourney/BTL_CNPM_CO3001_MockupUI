@@ -31,7 +31,7 @@ import {
 	getSessionBySubject,
 } from "../services/statsService";
 import { useAuth } from "../context/AuthContext";
-import { MOCK_SESSIONS, MOCK_FEEDBACK } from "../services/mockData";
+import { getAllSessions, MOCK_FEEDBACK } from "../services/mockData";
 
 const AdminReports = () => {
 	const { user } = useAuth();
@@ -256,6 +256,7 @@ const AdminReports = () => {
 
 	// Render Tutor Dashboard
 	const renderTutorDashboard = () => {
+		const MOCK_SESSIONS = getAllSessions();
 		const mySessions = MOCK_SESSIONS.filter((s) => s.tutorId === user?.id);
 		const myFeedback = MOCK_FEEDBACK.filter((f) => {
 			const session = MOCK_SESSIONS.find((s) => s.id === f.sessionId);
@@ -436,6 +437,7 @@ const AdminReports = () => {
 
 	// Render Student Dashboard
 	const renderStudentDashboard = () => {
+		const MOCK_SESSIONS = getAllSessions();
 		const mySessions = MOCK_SESSIONS.filter(
 			(s) => s.studentId === user?.id
 		);

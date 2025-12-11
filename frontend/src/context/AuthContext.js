@@ -73,6 +73,14 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated: true,
         isLoading: false,
       });
+      
+      // Track login activity
+      try {
+        const { saveLoginActivity } = await import('../services/mockData');
+        await saveLoginActivity(user.id);
+      } catch (error) {
+        console.error('Failed to track login activity:', error);
+      }
     } catch (error) {
       console.error('Login failed:', error);
       throw error;

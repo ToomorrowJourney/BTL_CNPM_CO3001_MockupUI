@@ -2,7 +2,7 @@
 import { format, addDays, startOfToday, isSameDay } from 'date-fns';
 import { Calendar as CalendarIcon, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { MOCK_SUBJECTS, MOCK_TUTORS, MOCK_SESSIONS } from '../services/mockData';
+import { MOCK_SUBJECTS, MOCK_TUTORS, getAllSessions, bookSession, getTutorAvailability } from '../services/mockData';
 import './BookSession.css';
 
 const BookSession = () => {
@@ -26,16 +26,25 @@ const BookSession = () => {
     const availableSlots= useMemo(() => {
         if (!selectedTutorId) return [];
         const tutor = MOCK_TUTORS.find(t => t.id === selectedTutorId);
+        if (!tutor) return [];
+        
         const dateKey = format(selectedDate, 'yyyy-MM-dd');
-        const slots = tutor?.availability[dateKey] || [];
+        
+        // Get availability from localStorage or default
+        const availability = getTutorAvailability(tutor.userId);
+        const slots = availability[dateKey] || [];
+        
+        // Lấy sessions từ localStorage
+        const allSessions = getAllSessions();
         
         // Đánh dấu các slot đã được book bởi user này
         return slots.map(slot => {
-            const hasConflict = MOCK_SESSIONS.some(session => {
+            const hasConflict = allSessions.some(session => {
                 if (session.studentId !== user?.id) return false;
                 if (session.status !== 'Scheduled') return false;
                 if (session.date !== dateKey) return false;
-                if (session.tutorId !== selectedTutorId) return false;
+                // So sánh với userId của tutor
+                if (session.tutorId !== tutor.userId) return false;
                 
                 // Kiểm tra trùng khung giờ
                 return session.time === `${slot.startTime} - ${slot.endTime}`;
@@ -53,14 +62,21 @@ const BookSession = () => {
     const checkConflict = () => {
         if (!selectedSlot || !selectedTutorId) return false;
         
+        const tutor = MOCK_TUTORS.find(t => t.id === selectedTutorId);
+        if (!tutor) return false;
+        
         const dateKey = format(selectedDate, 'yyyy-MM-dd');
         const slot = availableSlots.find(s => s.id === selectedSlot);
         
-        const conflict = MOCK_SESSIONS.find(session => {
+        // Lấy sessions từ localStorage
+        const allSessions = getAllSessions();
+        
+        const conflict = allSessions.find(session => {
             if (session.studentId !== user?.id) return false;
             if (session.status !== 'Scheduled') return false;
             if (session.date !== dateKey) return false;
-            if (session.tutorId !== selectedTutorId) return false;
+            // So sánh với userId của tutor
+            if (session.tutorId !== tutor.userId) return false;
             
             return session.time === `${slot.startTime} - ${slot.endTime}`;
         });
@@ -78,23 +94,47 @@ const BookSession = () => {
     };
 
     // Handlers
-    const handleBook = () => {
+    const handleBook = async () => {
         // Kiểm tra xung đột
         if (checkConflict()) {
             return;
         }
         
         setShowConfirmation(true);
-        setTimeout(() => {
-            alert('Booking Request Sent!');
+        
+        try {
+            const slot = availableSlots.find(s => s.id === selectedSlot);
+            const subject = MOCK_SUBJECTS.find(s => s.id === selectedSubject);
+            const dateKey = format(selectedDate, 'yyyy-MM-dd');
+            
+            // Get tutor userId from tutor profile
+            const tutor = MOCK_TUTORS.find(t => t.id === selectedTutorId);
+            
+            // Tạo session mới
+            await bookSession({
+                studentId: user?.id,
+                tutorId: tutor?.userId || selectedTutorId,
+                subjectId: selectedSubject,
+                subject: subject?.name || '',
+                date: dateKey,
+                time: `${slot.startTime} - ${slot.endTime}`
+            });
+            
+            setTimeout(() => {
+                alert('Booking Request Sent!');
+                setShowConfirmation(false);
+                // Reset selections
+                setSelectedSubject('');
+                setSelectedTutorId('');
+                setSelectedDate(startOfToday());
+                setSelectedSlot(null);
+                setConflictError('');
+            }, 500);
+        } catch (error) {
+            console.error('Error booking session:', error);
+            alert('Có lỗi xảy ra khi đặt buổi học. Vui lòng thử lại!');
             setShowConfirmation(false);
-            // Reset selections
-            setSelectedSubject('');
-            setSelectedTutorId('');
-            setSelectedDate(startOfToday());
-            setSelectedSlot(null);
-            setConflictError('');
-        }, 1000);
+        }
     };
 
     return (
@@ -196,9 +236,8 @@ const BookSession = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {['Sáng', 'Chiều', 'Tối'].map((period, index) => {
-                  const englishPeriod = ['Morning', 'Afternoon', 'Evening'][index];
-                  const slotsInPeriod = availableSlots.filter(s => s.period === englishPeriod);
+                {['Sáng', 'Chiều', 'Tối'].map((period) => {
+                  const slotsInPeriod = availableSlots.filter(s => s.period === period);
                   if (slotsInPeriod.length === 0) return null;
 
                   return (

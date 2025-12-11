@@ -1,6 +1,7 @@
-﻿import { MOCK_SESSIONS, MOCK_FEEDBACK, MOCK_SUBJECTS } from "./mockData";
+﻿import { getAllSessions, MOCK_FEEDBACK, MOCK_SUBJECTS } from "./mockData";
 
 export const getSystemStats = () => {
+    const MOCK_SESSIONS = getAllSessions();
     const totalSessions = MOCK_SESSIONS.length;
 
     const activeStudents = new Set(
@@ -25,6 +26,7 @@ export const getSystemStats = () => {
 
 // Data for Pie Chart (Session Statuses)
 export const getSessionStatusData = () => {
+    const MOCK_SESSIONS = getAllSessions();
     const statusCounts = MOCK_SESSIONS.reduce((acc, session) => {
         acc[session.status] = (acc[session.status] || 0) + 1;
         return acc;
@@ -56,6 +58,7 @@ export const getSessionStatusData = () => {
 
 // Data for Bar Chart (Sessions per Subject)
 export const getSessionBySubject = () => {
+    const MOCK_SESSIONS = getAllSessions();
     const subjectCounts = MOCK_SESSIONS.reduce((acc, session) => {
         acc[session.subjectId] = (acc[session.subjectId] || 0) + 1;
         return acc;
@@ -73,6 +76,7 @@ export const getSessionBySubject = () => {
 
 // Tutor performance stats
 export const getTutorStats = (tutorId) => {
+    const MOCK_SESSIONS = getAllSessions();
     // Filter feedback for this tutor
     const tutorFeedback = MOCK_FEEDBACK.filter((f) => {
         const session = MOCK_SESSIONS.find((s) => s.id === f.sessionId);
@@ -95,6 +99,7 @@ export const getTutorStats = (tutorId) => {
 
 // Student progress stats
 export const getStudentStats = (studentId) => {
+    const MOCK_SESSIONS = getAllSessions();
     const mySessions = MOCK_SESSIONS.filter((s) => s.studentId === studentId);
     const completedSessions = mySessions.filter(
         (s) => s.status === "Completed"

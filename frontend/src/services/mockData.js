@@ -67,37 +67,37 @@ export const MOCK_SESSIONS= [
     studentId: '2569004',
     tutorId: 'TUT001',
     subjectId: 'CO3001',
-    subject: 'Software Engineering',
+    subject: 'Công nghệ phần mềm',
     date: '2025-12-02',
     time: '14:00 - 15:00',
-    status: 'Scheduled'
+    status: 'Completed'
   },
   {
     id: 'SES002',
     studentId: '2569004',
     tutorId: 'TUT002',
     subjectId: 'CO2013',
-    subject: 'Database Systems',
+    subject: 'Hệ cơ sở dữ liệu',
     date: '2025-12-05',
     time: '10:00 - 11:30',
-    status: 'Scheduled'
+    status: 'Completed'
   },
   {
     id: 'SES003',
     studentId: '2569004',
     tutorId: 'TUT003',
     subjectId: 'CO2039',
-    subject: 'Advanced Programming',
+    subject: 'Lập trình nâng cao',
     date: '2025-12-08',
     time: '15:00 - 16:30',
-    status: 'Scheduled'
+    status: 'Completed'
   },
   {
     id: 'SES004',
     studentId: '2569004',
     tutorId: 'TUT001',
     subjectId: 'CO3001',
-    subject: 'Software Engineering',
+    subject: 'Công nghệ phần mềm',
     date: '2025-11-20',
     time: '09:00 - 10:00',
     status: 'Completed'
@@ -107,7 +107,7 @@ export const MOCK_SESSIONS= [
     studentId: '2569004',
     tutorId: 'TUT002',
     subjectId: 'CO2013',
-    subject: 'Database Systems',
+    subject: 'Hệ cơ sở dữ liệu',
     date: '2025-11-18',
     time: '13:00 - 14:30',
     status: 'Completed'
@@ -117,7 +117,7 @@ export const MOCK_SESSIONS= [
     studentId: '2569004',
     tutorId: 'TUT003',
     subjectId: 'CO2039',
-    subject: 'Advanced Programming',
+    subject: 'Lập trình nâng cao',
     date: '2025-11-15',
     time: '11:00 - 12:00',
     status: 'Cancelled',
@@ -128,7 +128,7 @@ export const MOCK_SESSIONS= [
     studentId: '2569004',
     tutorId: 'TUT001',
     subjectId: 'CO3001',
-    subject: 'Software Engineering',
+    subject: 'Công nghệ phần mềm',
     date: '2025-11-10',
     time: '16:00 - 17:30',
     status: 'Cancelled',
@@ -139,7 +139,7 @@ export const MOCK_SESSIONS= [
     studentId: '2569004',
     tutorId: 'TUT002',
     subjectId: 'CO2013',
-    subject: 'Database Systems',
+    subject: 'Hệ cơ sở dữ liệu',
     date: '2025-11-12',
     time: '14:00 - 15:30',
     status: 'Completed'
@@ -149,7 +149,7 @@ export const MOCK_SESSIONS= [
     studentId: '2569004',
     tutorId: 'TUT001',
     subjectId: 'CO3001',
-    subject: 'Software Engineering',
+    subject: 'Công nghệ phần mềm',
     date: '2025-11-08',
     time: '10:00 - 11:00',
     status: 'Completed'
@@ -159,10 +159,50 @@ export const MOCK_SESSIONS= [
     studentId: '2569004',
     tutorId: 'TUT003',
     subjectId: 'CO2039',
-    subject: 'Advanced Programming',
+    subject: 'Lập trình nâng cao',
     date: '2025-11-05',
     time: '13:00 - 14:30',
     status: 'Missed'
+  },
+  {
+    id: 'SES011',
+    studentId: '2569004',
+    tutorId: 'TUT001',
+    subjectId: 'CO3001',
+    subject: 'Công nghệ phần mềm',
+    date: '2025-11-28',
+    time: '14:00 - 15:30',
+    status: 'Completed'
+  },
+  {
+    id: 'SES012',
+    studentId: '2569004',
+    tutorId: 'TUT001',
+    subjectId: 'CO3001',
+    subject: 'Công nghệ phần mềm',
+    date: '2025-11-25',
+    time: '09:00 - 10:30',
+    status: 'Completed'
+  },
+  {
+    id: 'SES013',
+    studentId: '2569004',
+    tutorId: 'TUT001',
+    subjectId: 'CO3001',
+    subject: 'Công nghệ phần mềm',
+    date: '2025-11-22',
+    time: '13:00 - 14:30',
+    status: 'Completed'
+  },
+  {
+    id: 'SES014',
+    studentId: '2569004',
+    tutorId: 'TUT001',
+    subjectId: 'CO3001',
+    subject: 'Công nghệ phần mềm',
+    date: '2025-12-01',
+    time: '15:00 - 16:30',
+    status: 'Completed'
   }
 ];
 
@@ -503,32 +543,76 @@ export const MOCK_TEACHING_PLANS= [
   }
 ];
 
+// Sessions Storage Key
+const SESSIONS_KEY = 'sessions';
+
+// Get all sessions from localStorage or MOCK_SESSIONS
+export const getAllSessions = () => {
+  const stored = localStorage.getItem(SESSIONS_KEY);
+  if (stored) {
+    return JSON.parse(stored);
+  }
+  // Initialize with mock data
+  localStorage.setItem(SESSIONS_KEY, JSON.stringify(MOCK_SESSIONS));
+  return MOCK_SESSIONS;
+};
+
+// Book a new session
+export const bookSession = async (sessionData) => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  const sessions = getAllSessions();
+  
+  // Generate new session ID
+  const newId = `SES${String(sessions.length + 1).padStart(3, '0')}`;
+  
+  const newSession = {
+    id: newId,
+    studentId: sessionData.studentId,
+    tutorId: sessionData.tutorId,
+    subjectId: sessionData.subjectId,
+    subject: sessionData.subject,
+    date: sessionData.date,
+    time: sessionData.time,
+    status: 'Scheduled'
+  };
+  
+  sessions.push(newSession);
+  localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+  
+  return newSession;
+};
+
 export const cancelSession = async (sessionId, reason) => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 500));
 
-  const sessionIndex = MOCK_SESSIONS.findIndex(session => session.id === sessionId);
+  const sessions = getAllSessions();
+  const sessionIndex = sessions.findIndex(session => session.id === sessionId);
 
   if (sessionIndex === -1) {
     throw new Error('Session not found');
   }
 
-  if (MOCK_SESSIONS[sessionIndex].status !== 'Scheduled') {
+  if (sessions[sessionIndex].status !== 'Scheduled') {
     throw new Error('Only scheduled sessions can be cancelled');
   }
 
-  MOCK_SESSIONS[sessionIndex] = {
-    ...MOCK_SESSIONS[sessionIndex],
+  sessions[sessionIndex] = {
+    ...sessions[sessionIndex],
     status: 'Cancelled',
     cancelReason: reason
   };
+  
+  localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
 
-  return MOCK_SESSIONS[sessionIndex];
+  return sessions[sessionIndex];
 };
 export const MOCK_SUBJECTS= [
-  { id: 'CO3001', code: 'CO3001', name: 'Software Engineering' },
-  { id: 'CO2013', code: 'CO2013', name: 'Database Systems' },
-  { id: 'CO2039', code: 'CO2039', name: 'Advanced Programming' },
+  { id: 'CO3001', code: 'CO3001', name: 'Công nghệ phần mềm' },
+  { id: 'CO2013', code: 'CO2013', name: 'Hệ cơ sở dữ liệu' },
+  { id: 'CO2039', code: 'CO2039', name: 'Lập trình nâng cao' },
 ];
 
 const generateSlots = () => [
@@ -580,9 +664,11 @@ export const MOCK_TUTORS= [
   }
 ];
 
-// Course Materials Storage Key
+// Storage Keys
 const COURSE_MATERIALS_KEY = 'courseMaterials';
 const COURSES_KEY = 'courses';
+const TUTOR_AVAILABILITY_KEY = 'tutorAvailability';
+const LOGIN_ACTIVITIES_KEY = 'loginActivities';
 
 // Initialize mock courses
 const initializeCourses = () => {
@@ -595,40 +681,58 @@ const initializeCourses = () => {
     {
       id: 'CO3001',
       code: 'CO3001',
-      name: 'Software Engineering',
+      name: 'Công nghệ phần mềm',
       tutorId: 'TUT001',
-      description: 'Introduction to software engineering principles and practices',
+      description: 'Giới thiệu về nguyên lý và thực hành công nghệ phần mềm',
       credits: 4,
       semester: 'Fall 2025',
       enrolledStudents: ['2569004'],
-      category: 'Software Engineering'
+      category: 'Công nghệ phần mềm'
     },
     {
       id: 'CO2013',
       code: 'CO2013',
-      name: 'Database Systems',
+      name: 'Hệ cơ sở dữ liệu',
       tutorId: 'TUT002',
-      description: 'Fundamentals of database design and management',
+      description: 'Cơ bản về thiết kế và quản lý cơ sở dữ liệu',
       credits: 3,
       semester: 'Fall 2025',
       enrolledStudents: ['2569004'],
-      category: 'Database'
+      category: 'Cơ sở dữ liệu'
     },
     {
       id: 'CO2039',
       code: 'CO2039',
-      name: 'Advanced Programming',
+      name: 'Lập trình nâng cao',
       tutorId: 'TUT003',
-      description: 'Advanced programming concepts and techniques',
+      description: 'Các khái niệm và kỹ thuật lập trình nâng cao',
       credits: 3,
       semester: 'Fall 2025',
       enrolledStudents: ['2569004'],
-      category: 'Programming'
+      category: 'Lập trình'
     }
   ];
 
   localStorage.setItem(COURSES_KEY, JSON.stringify(courses));
   return courses;
+};
+
+// Helper function to create dummy file data for mock materials
+const createDummyFileData = (fileName, fileType) => {
+  // Create a simple text content based on file type
+  let content = `Mock file: ${fileName}\n\nThis is a demonstration file for the HCMUT Course Management System.\n\n`;
+  
+  if (fileType.includes('pdf')) {
+    content += 'This would be a PDF document containing course materials, syllabus, or lecture notes.';
+  } else if (fileType.includes('presentation') || fileType.includes('powerpoint')) {
+    content += 'This would be a PowerPoint presentation with lecture slides.';
+  } else if (fileType.includes('word') || fileType.includes('document')) {
+    content += 'This would be a Word document with course information.';
+  }
+  
+  // Create a blob and convert to data URL
+  const blob = new Blob([content], { type: 'text/plain' });
+  return URL.createObjectURL(blob);
 };
 
 // Initialize mock course materials
@@ -648,7 +752,7 @@ const initializeCourseMaterials = () => {
       uploadedBy: 'TUT001',
       uploadedAt: '2025-11-20T10:00:00Z',
       downloadUrl: '#',
-      fileData: ''
+      fileData: createDummyFileData('Software-Engineering-Syllabus.pdf', 'application/pdf')
     },
     {
       id: 'MAT002',
@@ -659,7 +763,7 @@ const initializeCourseMaterials = () => {
       uploadedBy: 'TUT001',
       uploadedAt: '2025-11-21T14:30:00Z',
       downloadUrl: '#',
-      fileData: ''
+      fileData: createDummyFileData('Week1-Introduction.pptx', 'application/vnd.openxmlformats-officedocument.presentationml.presentation')
     },
     {
       id: 'MAT003',
@@ -670,7 +774,7 @@ const initializeCourseMaterials = () => {
       uploadedBy: 'TUT002',
       uploadedAt: '2025-11-22T09:15:00Z',
       downloadUrl: '#',
-      fileData: ''
+      fileData: createDummyFileData('Database-Fundamentals.pdf', 'application/pdf')
     }
   ];
 
@@ -689,7 +793,20 @@ export const getCourseById = (courseId) => {
 // Get materials by course ID
 export const getMaterialsByCourseId = (courseId) => {
   const materials = initializeCourseMaterials();
-  return materials.filter(material => material.courseId === courseId);
+  
+  // Filter by courseId and ensure fileData exists for mock materials
+  return materials
+    .filter(material => material.courseId === courseId)
+    .map(material => {
+      // If fileData is missing or empty, regenerate it for mock materials
+      if (!material.fileData || material.fileData === '') {
+        return {
+          ...material,
+          fileData: createDummyFileData(material.fileName, material.fileType)
+        };
+      }
+      return material;
+    });
 };
 
 // Upload material
@@ -745,6 +862,38 @@ export const deleteMaterial = async (materialId) => {
   localStorage.setItem(COURSE_MATERIALS_KEY, JSON.stringify(filteredMaterials));
 };
 
+// Tutor Availability Functions
+// Get tutor availability from localStorage ONLY (no fallback to mock data)
+export const getTutorAvailability = (userId) => {
+  const stored = localStorage.getItem(TUTOR_AVAILABILITY_KEY);
+  
+  if (!stored) {
+    return {}; // Return empty if nothing stored
+  }
+  
+  const availabilityData = JSON.parse(stored);
+  
+  // Return stored availability for this user, or empty object
+  return availabilityData[userId] || {};
+};
+
+// Save tutor availability to localStorage
+export const saveTutorAvailability = async (userId, availability) => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  const stored = localStorage.getItem(TUTOR_AVAILABILITY_KEY);
+  let availabilityData = stored ? JSON.parse(stored) : {};
+  
+  // Update availability for this user
+  availabilityData[userId] = availability;
+  
+  // Save to localStorage
+  localStorage.setItem(TUTOR_AVAILABILITY_KEY, JSON.stringify(availabilityData));
+  
+  return true;
+};
+
 // Feedback Storage Functions
 const FEEDBACK_STORAGE_KEY = 'tutoring_feedbacks';
 
@@ -790,6 +939,7 @@ export const createFeedback = async (request) => {
     id: `FB${Date.now()}`,
     sessionId: request.sessionId,
     studentId: request.studentId,
+    tutorId: request.tutorId,
     rating: request.rating,
     ratingOverall: request.rating,
     ratingTutor: request.rating,
@@ -807,15 +957,83 @@ export const createFeedback = async (request) => {
 };
 
 /**
- *** Lấy lịch sử đăng nhập của người dùng
- *** @param _userId - ID người dùng (hiện tại chưa sử dụng, trả về tất cả hoạt động cho demo)
+ *** Lưu login activity mới
  **/
-export const getLoginActivities = async (_userId) => {
+export const saveLoginActivity = async (userId) => {
+  try {
+    // Get browser and OS info
+    const userAgent = navigator.userAgent;
+    let browser = 'Unknown';
+    let os = 'Unknown';
+    
+    // Detect browser
+    if (userAgent.indexOf('Chrome') > -1) browser = 'Chrome';
+    else if (userAgent.indexOf('Safari') > -1) browser = 'Safari';
+    else if (userAgent.indexOf('Firefox') > -1) browser = 'Firefox';
+    else if (userAgent.indexOf('Edge') > -1) browser = 'Edge';
+    
+    // Detect OS
+    if (userAgent.indexOf('Windows') > -1) os = 'Windows 11';
+    else if (userAgent.indexOf('Mac') > -1) os = 'macOS';
+    else if (userAgent.indexOf('Linux') > -1) os = 'Linux';
+    else if (userAgent.indexOf('Android') > -1) os = 'Android';
+    else if (userAgent.indexOf('iOS') > -1) os = 'iOS';
+    
+    // Create new activity
+    const newActivity = {
+      id: `LA${Date.now()}`,
+      userId,
+      timestamp: new Date().toISOString(),
+      ipAddress: '127.0.0.1', // In real app, get from server
+      device: `${browser} on ${os}`,
+      location: 'Ho Chi Minh City, Vietnam', // In real app, get from IP geolocation
+      status: 'success'
+    };
+    
+    // Get existing activities
+    const stored = localStorage.getItem(LOGIN_ACTIVITIES_KEY);
+    let activities = stored ? JSON.parse(stored) : {};
+    
+    // Initialize user's activities if not exists
+    if (!activities[userId]) {
+      activities[userId] = [];
+    }
+    
+    // Add new activity at the beginning
+    activities[userId].unshift(newActivity);
+    
+    // Keep only last 10 activities per user
+    activities[userId] = activities[userId].slice(0, 10);
+    
+    // Save to localStorage
+    localStorage.setItem(LOGIN_ACTIVITIES_KEY, JSON.stringify(activities));
+    
+    return newActivity;
+  } catch (error) {
+    console.error('Error saving login activity:', error);
+    return null;
+  }
+};
+
+/**
+ *** Lấy lịch sử đăng nhập của người dùng
+ **/
+export const getLoginActivities = async (userId) => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
-  // Return all login activities (in a real app, you would filter by userId)
-  return MOCK_LOGIN_ACTIVITIES;
+  // Get from localStorage
+  const stored = localStorage.getItem(LOGIN_ACTIVITIES_KEY);
+  
+  if (stored) {
+    const activities = JSON.parse(stored);
+    if (activities[userId] && activities[userId].length > 0) {
+      return activities[userId];
+    }
+  }
+  
+  // Return mock data for first time or if no stored data
+  return MOCK_LOGIN_ACTIVITIES.slice(0, 5);
 };
 
 /**
@@ -842,17 +1060,26 @@ export const getUserProfile = async (userId) => {
   }
   
   // Get all data in parallel using Promise.all
-  const [recentSessions, loginActivities, reports] = await Promise.all([
-    // Get user's 3 most recent sessions
-    Promise.resolve(
-      MOCK_SESSIONS
-        .filter(s => s.studentId === userId || s.tutorId === userId)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 3)
-    ),
+  const sessions = getAllSessions();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const upcomingSessions = sessions
+    .filter(s => {
+      const sessionDate = new Date(s.date);
+      return (s.studentId === userId || s.tutorId === userId) && 
+             s.status === 'Scheduled' &&
+             sessionDate >= today;
+    })
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .slice(0, 3);
+  
+  const [loginActivities, reports] = await Promise.all([
     getLoginActivities(userId),
     getReports(userId)
   ]);
+  
+  const recentSessions = upcomingSessions;
   
   return {
     user,

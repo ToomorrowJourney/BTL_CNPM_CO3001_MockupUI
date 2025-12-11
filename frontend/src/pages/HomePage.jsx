@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, User, BookOpen } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { MOCK_SESSIONS, MOCK_USERS } from '../services/mockData';
+import { getAllSessions, MOCK_USERS } from '../services/mockData';
 import './HomePage.css';
 
 const HomePage = () => {
@@ -15,10 +15,18 @@ const HomePage = () => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
-        return MOCK_SESSIONS
+        // Lấy sessions từ localStorage
+        const sessions = getAllSessions();
+        
+        return sessions
             .filter(session => {
                 const sessionDate = new Date(session.date);
-                return session.studentId === user?.id && 
+                // Student: lọc theo studentId, Tutor: lọc theo tutorId
+                const isUserSession = user?.role === 'Student' 
+                    ? session.studentId === user?.id
+                    : session.tutorId === user?.id;
+                
+                return isUserSession && 
                        session.status === 'Scheduled' && 
                        sessionDate >= today;
             })
@@ -72,7 +80,12 @@ const HomePage = () => {
             {upcomingSessions.length > 0 ? (
                 <div className="space-y-3">
                     {upcomingSessions.map(session => {
-                        const tutor = MOCK_USERS.find(u => u.id === session.tutorId);
+                        // For Student: show tutor, For Tutor: show student
+                        const otherUser = user?.role === 'Student'
+                            ? MOCK_USERS.find(u => u.id === session.tutorId)
+                            : MOCK_USERS.find(u => u.id === session.studentId);
+                        const userLabel = user?.role === 'Student' ? 'Gia sư' : 'Sinh viên';
+                        
                         return (
                             <div 
                                 key={session.id}
@@ -86,7 +99,7 @@ const HomePage = () => {
                                         <div className="space-y-1 text-sm text-gray-600">
                                             <div className="flex items-center">
                                                 <User className="w-4 h-4 mr-2" />
-                                                <span>Gia sư: {tutor?.name}</span>
+                                                <span>{userLabel}: {otherUser?.name || 'Unknown User'}</span>
                                             </div>
                                             <div className="flex items-center">
                                                 <Calendar className="w-4 h-4 mr-2" />

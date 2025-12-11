@@ -1,11 +1,37 @@
-﻿import React from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Calendar, Clock, BookOpen, FileText, Settings } from 'lucide-react';
+import { Calendar, Clock, BookOpen, FileText, Settings, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getAllSessions, MOCK_USERS } from '../services/mockData';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const [upcomingSessions, setUpcomingSessions] = useState([]);
+
+  useEffect(() => {
+    if (user?.role === 'Student' || user?.role === 'Tutor') {
+      const sessions = getAllSessions();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Get upcoming sessions for this user (student or tutor)
+      const upcoming = sessions
+        .filter(s => {
+          const isUserSession = user?.role === 'Student' 
+            ? s.studentId === user.id
+            : s.tutorId === user.id;
+          
+          return isUserSession && 
+                 s.status === 'Scheduled' && 
+                 new Date(s.date) >= today;
+        })
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(0, 3); // Show top 3 upcoming sessions
+      
+      setUpcomingSessions(upcoming);
+    }
+  }, [user]);
 
   // Student Dashboard View
   const StudentView = () => (
@@ -35,6 +61,54 @@ const Dashboard = () => {
             </div>
           </Link>
         </div>
+      </div>
+
+      {/* Upcoming Sessions Widget */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-800">Buổi Học Sắp Tới</h3>
+          <Link to="/my-sessions" className="text-sm text-hcmut-blue hover:underline">Xem Tất Cả</Link>
+        </div>
+        
+        {upcomingSessions.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+            <p>Không có buổi học nào được lên lịch hôm nay.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {upcomingSessions.map((session) => {
+              const tutor = MOCK_USERS.find(u => u.id === session.tutorId);
+              const sessionDate = new Date(session.date);
+              const isToday = sessionDate.toDateString() === new Date().toDateString();
+              
+              return (
+                <div key={session.id} className={`p-4 rounded-lg border ${isToday ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900">{session.subject}</h4>
+                      <div className="flex items-center mt-2 text-sm text-gray-600">
+                        <User className="w-4 h-4 mr-1" />
+                        <span>Gia sư: {tutor?.name || 'Unknown Tutor'}</span>
+                      </div>
+                      <div className="flex items-center mt-1 text-sm text-gray-600">
+                        <Calendar className="w-4 h-4 mr-1" />
+                        <span>{sessionDate.toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      </div>
+                      <div className="flex items-center mt-1 text-sm text-gray-600">
+                        <Clock className="w-4 h-4 mr-1" />
+                        <span>{session.time}</span>
+                      </div>
+                    </div>
+                    {isToday && (
+                      <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">Hôm nay</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Recent Activity Widget*/}
@@ -86,6 +160,54 @@ const Dashboard = () => {
             <p className="text-xs text-gray-500 mt-1">Xem đánh giá sinh viên và ghi nhận tiến độ</p>
           </Link>
         </div>
+      </div>
+
+      {/* Upcoming Sessions Widget for Tutor */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-800">Buổi Học Sắp Tới</h3>
+          <Link to="/my-sessions" className="text-sm text-hcmut-blue hover:underline">Xem Tất Cả</Link>
+        </div>
+        
+        {upcomingSessions.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+            <p>Không có buổi học nào được lên lịch.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {upcomingSessions.map((session) => {
+              const student = MOCK_USERS.find(u => u.id === session.studentId);
+              const sessionDate = new Date(session.date);
+              const isToday = sessionDate.toDateString() === new Date().toDateString();
+              
+              return (
+                <div key={session.id} className={`p-4 rounded-lg border ${isToday ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900">{session.subject}</h4>
+                      <div className="flex items-center mt-2 text-sm text-gray-600">
+                        <User className="w-4 h-4 mr-1" />
+                        <span>Sinh viên: {student?.name || 'Unknown Student'}</span>
+                      </div>
+                      <div className="flex items-center mt-1 text-sm text-gray-600">
+                        <Calendar className="w-4 h-4 mr-1" />
+                        <span>{sessionDate.toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      </div>
+                      <div className="flex items-center mt-1 text-sm text-gray-600">
+                        <Clock className="w-4 h-4 mr-1" />
+                        <span>{session.time}</span>
+                      </div>
+                    </div>
+                    {isToday && (
+                      <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">Hôm nay</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

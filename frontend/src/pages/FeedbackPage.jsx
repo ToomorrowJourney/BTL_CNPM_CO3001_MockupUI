@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { MOCK_FEEDBACK, MOCK_SESSIONS, MOCK_USERS } from '../services/mockData';
+import { getAllSessions, MOCK_USERS } from '../services/mockData';
 import { Star, MessageSquare, Calendar, User as UserIcon } from 'lucide-react';
 import './FeedbackPage.css';
 
@@ -12,14 +12,18 @@ const FeedbackPage = () => {
   useEffect(() => {
     // Simulate fetching data
     const fetchFeedback = async () => {
-      // In a real app, this would be an API call filtering by tutor ID
-      // For now, we filter MOCK_FEEDBACK based on sessions where the current user is the tutor
       if (!user) return;
 
+      // Get all feedbacks from localStorage
+      const storedFeedbacks = localStorage.getItem('tutoring_feedbacks');
+      let allFeedbacks = storedFeedbacks ? JSON.parse(storedFeedbacks) : [];
+      
+      // Filter feedbacks for this tutor's sessions
+      const MOCK_SESSIONS = getAllSessions();
       const tutorSessions = MOCK_SESSIONS.filter(s => s.tutorId === user.id);
       const tutorSessionIds = tutorSessions.map(s => s.id);
       
-      const relevantFeedback = MOCK_FEEDBACK.filter(f => tutorSessionIds.includes(f.sessionId));
+      const relevantFeedback = allFeedbacks.filter(f => tutorSessionIds.includes(f.sessionId));
       
       // Sort by date descending
       relevantFeedback.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -37,6 +41,7 @@ const FeedbackPage = () => {
   };
 
   const getSessionDate = (sessionId) => {
+      const MOCK_SESSIONS = getAllSessions();
       const session = MOCK_SESSIONS.find(s => s.id === sessionId);
       return session ? session.date : 'Không rõ';
   };

@@ -97,6 +97,7 @@ const SessionFeedback = () => {
       await createFeedback({
         sessionId: session.id,
         studentId: user.id,
+        tutorId: session.tutorId,
         rating,
         comments: comments.trim(),
       });

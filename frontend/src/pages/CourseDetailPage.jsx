@@ -184,11 +184,23 @@ const CourseDetailPage = () => {
       const link = document.createElement('a');
       link.href = material.fileData;
       link.download = material.fileName;
+      link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(link);
+      }, 100);
+      
+      // Show success message
+      setUploadProgress(`Đang tải xuống ${material.fileName}...`);
+      setTimeout(() => {
+        setUploadProgress('');
+      }, 2000);
     } catch (err) {
-      setError('Không thể tải file xuống');
+      console.error('Error downloading file:', err);
+      setError('Không thể tải file xuống. Vui lòng thử lại.');
     }
   };
 
@@ -276,16 +288,19 @@ const CourseDetailPage = () => {
               >
                 Tài Liệu
               </button>
-              <button
-                onClick={() => setActiveTab('feedback')}
-                className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                  activeTab === 'feedback'
-                    ? 'bg-hcmut-blue text-white'
-                    : 'text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Phản Hồi
-              </button>
+              {/* Feedback tab - chỉ hiển thị cho sinh viên */}
+              {!isTutor && (
+                <button
+                  onClick={() => setActiveTab('feedback')}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                    activeTab === 'feedback'
+                      ? 'bg-hcmut-blue text-white'
+                      : 'text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Phản Hồi
+                </button>
+              )}
             </nav>
           </div>
 
